@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Researcher Form – Job Interview Answer Analyzer</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Calibri', 'Trebuchet MS', sans-serif; background: #f4f3fb; color: #1a1a2e; padding: 24px 16px; }
+.container { max-width: 760px; margin: 0 auto; }
+.header { background: #2C2F6B; color: white; border-radius: 10px; padding: 24px 28px; margin-bottom: 20px; }
+.header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.75; }
+.tag { display: inline-block; background: #D85A30; color: white; border-radius: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; margin-top: 10px; letter-spacing: 0.05em; }
+.section { background: white; border-radius: 10px; padding: 22px 26px; margin-bottom: 16px; border-left: 4px solid #2AAD6B; }
+.section.task-sec { border-left-color: #2C2F6B; }
+.section.score-sec { border-left-color: #D85A30; }
+.section h2 { font-size: 15px; font-weight: 700; color: #2C2F6B; margin-bottom: 14px; }
+.badge { display: inline-block; background: #2C2F6B; color: white; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-right: 6px; }
+.badge.green { background: #2AAD6B; }
+.badge.red { background: #D85A30; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+.field input, .field select { border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; font-size: 13px; font-family: inherit; }
+.field input:focus, .field select:focus { outline: 2px solid #2C2F6B; border-color: transparent; }
+.task { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #eee; }
+.task:last-of-type { border-bottom: none; }
+.task-row { display: flex; gap: 10px; align-items: flex-start; }
+.task-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: #2C2F6B; color: white; border-radius: 50%; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.task-body { font-size: 13px; line-height: 1.6; color: #333; }
+.task-body strong { display: block; color: #1a1a2e; margin-bottom: 3px; }
+.note-box { background: #f0f8f4; border-left: 3px solid #2AAD6B; border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 12px; color: #555; margin-top: 8px; }
+.success-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.success-row:last-child { border-bottom: none; }
+.success-row label { flex: 1; }
+.radio-group { display: flex; gap: 16px; }
+.radio-group label { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.radio-group input { accent-color: #2C2F6B; }
+.quote-box { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 70px; }
+.quote-box:focus { outline: 2px solid #2C2F6B; border-color: transparent; }
+.sus-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 12px; }
+.sus-input-group { display: flex; flex-direction: column; gap: 4px; }
+.sus-input-group label { font-size: 11px; font-weight: 700; color: #888; text-align: center; }
+.sus-input-group input { border: 1px solid #ddd; border-radius: 6px; padding: 8px; font-size: 13px; font-family: inherit; text-align: center; width: 100%; }
+.sus-input-group input:focus { outline: 2px solid #2C2F6B; border-color: transparent; }
+.calc-btn { background: #2C2F6B; color: white; border: none; border-radius: 8px; padding: 10px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; }
+.calc-btn:hover { background: #1e2255; }
+.score-result { margin-top: 14px; padding: 16px; background: #f4f3fb; border-radius: 8px; text-align: center; display: none; }
+.score-result .big { font-size: 48px; font-weight: 700; color: #2C2F6B; }
+.score-result .grade { font-size: 16px; font-weight: 600; color: #2AAD6B; }
+.score-result .lbl { font-size: 13px; color: #888; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>Researcher Form</h1>
+  <p>Job Interview Answer Analyzer &nbsp;·&nbsp; NLP & Text Mining SoSe 2026 &nbsp;·&nbsp; Wudh Boonchan</p>
+  <div class="tag">RESEARCHER ONLY – Do not share with participant</div>
+</div>
+
+<!-- Participant Info -->
+<div class="section">
+  <h2><span class="badge green">INFO</span> Participant Information</h2>
+  <div class="field-row">
+    <div class="field">
+      <label>Participant ID</label>
+      <input type="text" placeholder="P1">
+    </div>
+    <div class="field">
+      <label>Age range</label>
+      <select><option value="">Select</option><option>18–24</option><option>25–34</option><option>35–44</option><option>45+</option></select>
+    </div>
+    <div class="field">
+      <label>Job-seeking status</label>
+      <select><option value="">Select</option><option>Actively job seeking</option><option>Open to opportunities</option><option>Not currently seeking</option></select>
+    </div>
+    <div class="field">
+      <label>Prior interview prep tool use</label>
+      <select><option value="">Select</option><option>Never</option><option>Rarely</option><option>Sometimes</option><option>Frequently</option></select>
+    </div>
+  </div>
+</div>
+
+<!-- Task Protocol -->
+<div class="section task-sec">
+  <h2><span class="badge">TASKS</span> Task Protocol</h2>
+  <p style="font-size:12px;color:#888;margin-bottom:14px;">Read each task aloud. Do not assist unless the participant is completely stuck. Mark success below.</p>
+
+  <div class="task">
+    <div class="task-row">
+      <div class="task-num">1</div>
+      <div class="task-body">
+        <strong>Record and analyze a verbal answer</strong>
+        "Open the prototype, select the question 'Tell me about yourself and your background,' then record a spoken answer of at least three sentences. Review the analysis results."
+        <div class="note-box">Observe: can they find the record button without help? Does the transcription appear correctly?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-row">
+      <div class="task-num">2</div>
+      <div class="task-body">
+        <strong>Interpret the STAR feedback</strong>
+        "Looking at the results, identify which STAR components were detected as present and which as missing. Tell me what you think 'Task' means in this context."
+        <div class="note-box">Observe: do they understand the STAR labels without explanation? Do they find the layout intuitive?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-row">
+      <div class="task-num">3</div>
+      <div class="task-body">
+        <strong>Use Text input and interpret the relevance badge</strong>
+        "Switch to the Text tab, type a short answer to any question, and explain what the relevance badge tells you about your answer."
+        <div class="note-box">Observe: can they locate the Text tab? Does the Low/Moderate/High label make sense without explanation?</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;">
+    <p style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Task Success (completed without assistance)</p>
+    <div class="success-row"><label>Task 1: Record and analyze</label><div class="radio-group"><label><input type="radio" name="t1" value="1"> Yes</label><label><input type="radio" name="t1" value="0"> No</label></div></div>
+    <div class="success-row"><label>Task 2: Interpret STAR feedback</label><div class="radio-group"><label><input type="radio" name="t2" value="1"> Yes</label><label><input type="radio" name="t2" value="0"> No</label></div></div>
+    <div class="success-row"><label>Task 3: Text input and relevance badge</label><div class="radio-group"><label><input type="radio" name="t3" value="1"> Yes</label><label><input type="radio" name="t3" value="0"> No</label></div></div>
+  </div>
+</div>
+
+<!-- Quote -->
+<div class="section">
+  <h2><span class="badge green">QUOTE</span> User Quote</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:10px;">Ask verbally: "In one or two sentences, how would you describe this tool to a friend preparing for job interviews?"</p>
+  <textarea class="quote-box" placeholder="Write participant's response here..."></textarea>
+</div>
+
+<!-- SUS Score Entry -->
+<div class="section score-sec">
+  <h2><span class="badge red">SUS</span> SUS Score Calculator</h2>
+  <p style="font-size:13px;color:#555;margin-bottom:14px;">After the participant submits their SUS form, enter their answers (1–5) for each question here to calculate the score.</p>
+  <div class="sus-grid">
+    <div class="sus-input-group"><label>Q1</label><input type="number" id="s1" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q2</label><input type="number" id="s2" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q3</label><input type="number" id="s3" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q4</label><input type="number" id="s4" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q5</label><input type="number" id="s5" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q6</label><input type="number" id="s6" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q7</label><input type="number" id="s7" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q8</label><input type="number" id="s8" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q9</label><input type="number" id="s9" min="1" max="5" placeholder="1–5"></div>
+    <div class="sus-input-group"><label>Q10</label><input type="number" id="s10" min="1" max="5" placeholder="1–5"></div>
+  </div>
+  <button class="calc-btn" onclick="calcSUS()">Calculate SUS Score</button>
+  <div class="score-result" id="result">
+    <div class="big" id="score-val">–</div>
+    <div class="grade" id="grade-val"></div>
+    <div class="lbl" id="lbl-val"></div>
+  </div>
+</div>
+
+</div>
+<script>
+function calcSUS() {
+  let total = 0;
+  for (let i = 1; i <= 10; i++) {
+    const v = parseInt(document.getElementById('s'+i).value);
+    if (isNaN(v) || v < 1 || v > 5) { alert('Please enter values 1–5 for all 10 questions.'); return; }
+    total += i % 2 === 1 ? v - 1 : 5 - v;
+  }
+  const score = total * 2.5;
+  let grade, label;
+  if (score >= 90)      { grade = 'A+'; label = 'Best Imaginable'; }
+  else if (score >= 85) { grade = 'A';  label = 'Excellent'; }
+  else if (score >= 80) { grade = 'B+'; label = 'Good'; }
+  else if (score >= 70) { grade = 'B';  label = 'Good'; }
+  else if (score >= 60) { grade = 'C';  label = 'Okay'; }
+  else if (score >= 50) { grade = 'D';  label = 'Poor'; }
+  else                  { grade = 'F';  label = 'Awful'; }
+  document.getElementById('score-val').textContent = score.toFixed(1);
+  document.getElementById('grade-val').textContent = 'Grade ' + grade;
+  document.getElementById('lbl-val').textContent = label;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

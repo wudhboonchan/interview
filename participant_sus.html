@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUS Questionnaire – Job Interview Answer Analyzer</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Calibri', 'Trebuchet MS', sans-serif; background: #f4f3fb; color: #1a1a2e; padding: 24px 16px; }
+.container { max-width: 640px; margin: 0 auto; }
+.header { background: #2C2F6B; color: white; border-radius: 10px; padding: 24px 28px; margin-bottom: 20px; }
+.header h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.header p { font-size: 13px; opacity: 0.8; line-height: 1.6; }
+.section { background: white; border-radius: 10px; padding: 22px 26px; margin-bottom: 16px; }
+.section h2 { font-size: 15px; font-weight: 700; color: #2C2F6B; margin-bottom: 6px; }
+.intro { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 18px; }
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.field label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+.field input { border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; font-size: 13px; font-family: inherit; }
+.field input:focus { outline: 2px solid #2C2F6B; border-color: transparent; }
+.scale-header { display: grid; grid-template-columns: 1fr repeat(5,44px); gap: 4px; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: #888; text-align: center; }
+.scale-header .lh { text-align: left; }
+.sus-item { display: grid; grid-template-columns: 1fr repeat(5,44px); gap: 4px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+.sus-item:last-child { border-bottom: none; }
+.sus-q { font-size: 13px; color: #333; line-height: 1.5; padding-right: 10px; }
+.sus-q .qnum { font-weight: 700; color: #2C2F6B; margin-right: 4px; }
+.radio-cell { display: flex; justify-content: center; }
+.radio-cell input[type=radio] { width: 20px; height: 20px; accent-color: #2C2F6B; cursor: pointer; }
+.submit-btn { width: 100%; background: #2AAD6B; color: white; border: none; border-radius: 8px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 16px; }
+.submit-btn:hover { background: #229958; }
+.submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+.done-box { display: none; background: #2C2F6B; color: white; border-radius: 10px; padding: 32px 28px; text-align: center; margin-bottom: 16px; }
+.done-box .icon { font-size: 48px; margin-bottom: 12px; }
+.done-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.done-box p { font-size: 14px; opacity: 0.8; line-height: 1.6; }
+.error-msg { color: #D85A30; font-size: 12px; margin-top: 8px; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>Questionnaire</h1>
+  <p>Thank you for testing the Job Interview Answer Analyzer. Please fill in your Participant ID and answer the 10 questions below based on your experience today.</p>
+</div>
+
+<div class="section" id="form-section">
+  <h2>System Usability Scale</h2>
+  <p class="intro">For each statement, select a number from <strong>1 (Strongly Disagree)</strong> to <strong>5 (Strongly Agree)</strong>. There are no right or wrong answers.</p>
+
+  <div class="field">
+    <label>Participant ID (provided by researcher)</label>
+    <input type="text" id="pid" placeholder="e.g. P1">
+  </div>
+
+  <div class="scale-header">
+    <div class="lh">Statement</div>
+    <div>1<br><span style="font-weight:400;font-size:10px">Strongly<br>Disagree</span></div>
+    <div>2</div><div>3</div><div>4</div>
+    <div>5<br><span style="font-weight:400;font-size:10px">Strongly<br>Agree</span></div>
+  </div>
+
+  <div id="sus-items"></div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitSUS()">Submit Responses</button>
+  <p class="error-msg" id="error-msg">Please fill in your Participant ID and answer all 10 questions.</p>
+</div>
+
+<div class="done-box" id="done-box">
+  <div class="icon">✓</div>
+  <h2>Thank you!</h2>
+  <p>Your responses have been submitted successfully.<br>You can now close this page.</p>
+</div>
+
+</div>
+<script>
+const SUS_QUESTIONS = [
+  "I think that I would like to use this system frequently.",
+  "I found the system more complicated than it needed to be.",
+  "I thought the system was easy to use.",
+  "I think that I would need the support of a technical person to be able to use this system.",
+  "I found the various functions in this system were well integrated.",
+  "I thought there was too much inconsistency in this system.",
+  "I would imagine that most people would learn to use this system very quickly.",
+  "I found the system awkward and difficult to use.",
+  "I felt very confident using the system.",
+  "I needed to learn a lot of things before I could get going with this system."
+];
+
+const container = document.getElementById('sus-items');
+SUS_QUESTIONS.forEach((q, i) => {
+  const row = document.createElement('div');
+  row.className = 'sus-item';
+  let html = `<div class="sus-q"><span class="qnum">${i+1}.</span>${q}</div>`;
+  for (let v = 1; v <= 5; v++) {
+    html += `<div class="radio-cell"><input type="radio" name="sus${i}" value="${v}"></div>`;
+  }
+  row.innerHTML = html;
+  container.appendChild(row);
+});
+
+async function submitSUS() {
+  const pid = document.getElementById('pid').value.trim();
+  if (!pid) { showError(); return; }
+
+  let total = 0, answers = {};
+  for (let i = 0; i < 10; i++) {
+    const sel = document.querySelector(`input[name="sus${i}"]:checked`);
+    if (!sel) { showError(); return; }
+    const v = parseInt(sel.value);
+    answers[`Q${i+1}`] = v;
+    total += i % 2 === 0 ? v - 1 : 5 - v;
+  }
+
+  const score = total * 2.5;
+  document.getElementById('error-msg').style.display = 'none';
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    const payload = {
+      participant_id: pid,
+      sus_score: score.toFixed(1),
+      ...answers
+    };
+
+    const res = await fetch('https://formspree.io/f/xgoqyejg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('done-box').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Submit Responses';
+      alert('Submission failed. Please try again.');
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Submit Responses';
+    alert('Network error. Please check your connection and try again.');
+  }
+}
+
+function showError() {
+  document.getElementById('error-msg').style.display = 'block';
+}
+</script>
+</body>
+</html>
