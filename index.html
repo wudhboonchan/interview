@@ -44,7 +44,7 @@ body { font-family: 'Calibri', 'Trebuchet MS', sans-serif; background: #f4f3fb; 
 
 <div class="header">
   <h1>Questionnaire</h1>
-  <p>Thank you for testing the Job Interview Answer Analyzer. Please fill in your Participant ID given by Wudh and answer all questions below based on your experience today.</p>
+  <p>Thank you for testing the Job Interview Answer Analyzer. Please fill in your Participant ID and answer all questions below based on your experience today.</p>
 </div>
 
 <div class="section" id="form-section">
@@ -106,7 +106,7 @@ const SUS_QUESTIONS = [
   "The different parts of the tool work well together.",
   "The tool behaves in a consistent and predictable way.",
   "Most people could learn to use this tool quickly.",
-  "Using this tool requires a lot of effort and frustrating.",
+  "Using this tool requires a lot of effort.",
   "I feel confident using this tool.",
   "I had to figure out too many things before I could start using the tool."
 ];
@@ -133,7 +133,10 @@ async function submitSUS() {
     if (!sel) { showError(); return; }
     const v = parseInt(sel.value);
     answers[`Q${i+1}`] = v;
-    total += i % 2 === 0 ? v - 1 : 5 - v;
+    // Polarity: positive = v-1, negative = 5-v
+    // Q1,3,5,7,9 = positive; Q2,4,8,10 = negative; Q6 = positive (rewritten from original)
+    const positive = [0, 2, 4, 5, 6, 8]; // 0-indexed
+    total += positive.includes(i) ? v - 1 : 5 - v;
   }
 
   const score = total * 2.5;
